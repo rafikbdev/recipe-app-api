@@ -15,7 +15,7 @@ TOKEN_URL = reverse('user:token')
 
 def create_user(**params):
     """Create and return a new user."""
-    return get_user_model().objects.create(**params)
+    return get_user_model().objects.create_user(**params)
 
 
 class PublicUserApiTest(TestCase):
@@ -68,12 +68,13 @@ class PublicUserApiTest(TestCase):
     def test_create_token_for_user(self):
         """Test generates token far valid credentials."""
         user_details = {
-            'email': 'test@example.com',
-            'password': 'testpass123',
             'name': 'Test Name',
+            'email': 'test@example.com',
+            'password': 'test-user-password123',
         }
 
         create_user(**user_details)
+
         payload = {
             'email': user_details['email'],
             'password': user_details['password'],
@@ -87,7 +88,7 @@ class PublicUserApiTest(TestCase):
         """Test returs error if credentials are invalid"""
         create_user(email='test@example.com', password='goodpass')
 
-        payload = {'email': 'test@example.com' ,'password': 'badpass'}
+        payload = {'email': 'test@example.com', 'password': 'badpass'}
         res = self.client.post(TOKEN_URL, payload)
 
         self.assertNotIn('token', res.data)
@@ -95,7 +96,7 @@ class PublicUserApiTest(TestCase):
 
     def test_create_token_blank_password(self):
         """Test posting a blank password returns a error"""
-        payload = {'email': 'test@example.com' ,'password': ''}
+        payload = {'email': 'test@example.com', 'password': ''}
         res = self.client.post(TOKEN_URL, payload)
 
         self.assertNotIn('token', res.data)
